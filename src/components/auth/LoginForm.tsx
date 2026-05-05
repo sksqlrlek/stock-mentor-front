@@ -4,19 +4,30 @@ import { ROUTES } from '../../constants/routes'
 import { useAuth } from '../../context/AuthContext'
 import axiosInstance from '../../api/axiosInstance'
 
+interface LoginResponse {
+  accessToken: string
+  user: {
+    id: number
+    email: string
+    nickname: string
+    riskType: 'AGGRESSIVE' | 'NEUTRAL' | 'CONSERVATIVE' | null
+    interestSector: string | null
+  }
+}
+
 function LoginForm() {
   const { login } = useAuth()
-  const [email, setEmail] = useState('')
-  const [password, setPassword] = useState('')
-  const [error, setError] = useState('')
+  const [email, setEmail] = useState<string>('')
+  const [password, setPassword] = useState<string>('')
+  const [error, setError] = useState<string>('')
 
-  const handleSubmit = async (e) => {
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault()
     setError('')
     try {
-      const response = await axiosInstance.post('/api/auth/login', { email, password })
+      const response = await axiosInstance.post<LoginResponse>('/api/auth/login', { email, password })
       login(response.data.accessToken, response.data.user)
-    } catch (error) {
+    } catch {
       setError('이메일 또는 비밀번호가 올바르지 않습니다.')
     }
   }
@@ -35,7 +46,7 @@ function LoginForm() {
             type="email"
             placeholder="user@example.com"
             value={email}
-            onChange={(e) => setEmail(e.target.value)}
+            onChange={(e: React.ChangeEvent<HTMLInputElement>) => setEmail(e.target.value)}
             required
           />
         </div>
@@ -53,7 +64,7 @@ function LoginForm() {
             type="password"
             placeholder="••••••••"
             value={password}
-            onChange={(e) => setPassword(e.target.value)}
+            onChange={(e: React.ChangeEvent<HTMLInputElement>) => setPassword(e.target.value)}
             required
           />
         </div>

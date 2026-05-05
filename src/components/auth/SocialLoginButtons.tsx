@@ -1,4 +1,8 @@
-function SocialLoginButtons({ label = '로그인' }) {
+interface SocialLoginButtonsProps {
+  label?: string
+}
+
+function SocialLoginButtons({ label = '로그인' }: SocialLoginButtonsProps) {
   const handleKakao = () => {
     window.location.href = 'http://localhost:8080/oauth2/authorization/kakao'
   }
