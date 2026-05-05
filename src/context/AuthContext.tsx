@@ -1,9 +1,23 @@
-import { createContext, useContext, useState } from 'react'
+import { createContext, useContext, useState, ReactNode } from 'react'
 
-export const AuthContext = createContext(null)
+interface User {
+  id: number
+  email: string
+  nickname: string
+  riskType: 'AGGRESSIVE' | 'NEUTRAL' | 'CONSERVATIVE' | null
+  interestSector: string | null
+}
 
-export function AuthProvider({ children }) {
-  const [user, setUser] = useState(() => {
+interface AuthContextType {
+  user: User | null
+  login: (token: string, userData: User) => void
+  logout: () => void
+}
+
+export const AuthContext = createContext<AuthContextType | null>(null)
+
+export function AuthProvider({ children }: { children: ReactNode }) {
+  const [user, setUser] = useState<User | null>(() => {
     const token = localStorage.getItem('accessToken')
     const savedUser = localStorage.getItem('user')
     if (token && savedUser) {
@@ -12,7 +26,7 @@ export function AuthProvider({ children }) {
     return null
   })
 
-  const login = (token, userData) => {
+  const login = (token: string, userData: User) => {
     localStorage.setItem('accessToken', token)
     localStorage.setItem('user', JSON.stringify(userData))
     setUser(userData)
@@ -31,6 +45,10 @@ export function AuthProvider({ children }) {
   )
 }
 
-export function useAuth() {
-  return useContext(AuthContext)
+export function useAuth(): AuthContextType {
+  const context = useContext(AuthContext)
+  if (!context) {
+    throw new Error('useAuth는 AuthProvider 안에서만 사용할 수 있습니다.')
+  }
+  return context
 }
