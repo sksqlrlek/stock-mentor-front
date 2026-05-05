@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { ComposedChart, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts'
+import { ComposedChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Cell } from 'recharts'
 
 interface ChartData {
   date: string
@@ -18,6 +18,7 @@ interface CandleData {
   close: number
   volume: number
   isPositive: boolean
+  candleBody: [number, number]
 }
 
 interface StockChartProps {
@@ -42,55 +43,15 @@ const CustomTooltip = ({ active, payload }: { active?: boolean; payload?: Array<
       <p className="text-on-surface-variant mb-2">{d.date}</p>
       <div className="grid grid-cols-2 gap-x-4 gap-y-1">
         <span className="text-on-surface-variant">시가</span>
-        <span className="text-on-surface font-mono">{d.open.toLocaleString()}</span>
+        <span className="text-on-surface">{d.open.toLocaleString()}</span>
         <span className="text-on-surface-variant">고가</span>
-        <span className="text-secondary font-mono">{d.high.toLocaleString()}</span>
+        <span className="text-secondary">{d.high.toLocaleString()}</span>
         <span className="text-on-surface-variant">저가</span>
-        <span className="text-[#f85149] font-mono">{d.low.toLocaleString()}</span>
+        <span className="text-error">{d.low.toLocaleString()}</span>
         <span className="text-on-surface-variant">종가</span>
-        <span className="text-on-surface font-mono">{d.close.toLocaleString()}</span>
+        <span className="text-on-surface">{d.close.toLocaleString()}</span>
       </div>
     </div>
-  )
-}
-
-const CandleStick = (props: {
-  x?: number
-  y?: number
-  width?: number
-  height?: number
-  payload?: CandleData
-  yAxis?: { scale: (v: number) => number }
-}) => {
-  const { x = 0, y = 0, width = 0, payload, yAxis } = props
-  if (!payload || !yAxis?.scale) return null
-
-  const { open, high, low, close, isPositive } = payload
-  const scale = yAxis.scale
-
-  const highY = scale(high)
-  const lowY = scale(low)
-  const openY = scale(open)
-  const closeY = scale(close)
-
-  const bodyTop = Math.min(openY, closeY)
-  const bodyHeight = Math.max(Math.abs(closeY - openY), 2)
-  const centerX = x + width / 2
-  const color = isPositive ? '#3fb950' : '#f85149'
-
-  return (
-    <g>
-      <line x1={centerX} y1={highY} x2={centerX} y2={bodyTop} stroke={color} strokeWidth={1.5} />
-      <line x1={centerX} y1={bodyTop + bodyHeight} x2={centerX} y2={lowY} stroke={color} strokeWidth={1.5} />
-      <rect
-        x={x + width * 0.1}
-        y={bodyTop}
-        width={width * 0.8}
-        height={bodyHeight}
-        fill={color}
-        rx={1}
-      />
-    </g>
   )
 }
 
@@ -105,19 +66,21 @@ function StockChart({ data, onPeriodChange }: StockChartProps) {
   const candleData: CandleData[] = data.map((item) => {
     const open = parseFloat(item.openPrice)
     const close = parseFloat(item.closePrice)
+    const high = parseFloat(item.highPrice)
+    const low = parseFloat(item.lowPrice)
+    const isPositive = close >= open
+
     return {
       date: item.date,
       open,
-      high: parseFloat(item.highPrice),
-      low: parseFloat(item.lowPrice),
+      high,
+      low,
       close,
       volume: parseFloat(item.volume),
-      isPositive: close >= open,
+      isPositive,
+      candleBody: [Math.min(open, close), Math.max(open, close)],
     }
   })
-
-  const minPrice = Math.min(...candleData.map(d => d.low)) * 0.999
-  const maxPrice = Math.max(...candleData.map(d => d.high)) * 1.001
 
   return (
     <div className="bg-[#161b22] border border-[#30363d] rounded-xl p-space-md">
@@ -153,17 +116,19 @@ function StockChart({ data, onPeriodChange }: StockChartProps) {
             tick={{ fill: '#8b949e', fontSize: 11 }}
             tickLine={false}
             axisLine={false}
-            domain={[minPrice, maxPrice]}
+            domain={['auto', 'auto']}
             tickFormatter={(v) => v.toLocaleString()}
             width={70}
           />
           <Tooltip content={<CustomTooltip />} />
-          {candleData.map((entry, index) => (
-            <CandleStick
-              key={index}
-              payload={entry}
-            />
-          ))}
+          <Bar dataKey="candleBody" radius={[2, 2, 2, 2]}>
+            {candleData.map((entry, index) => (
+              <Cell
+                key={index}
+                fill={entry.isPositive ? '#3fb950' : '#f85149'}
+              />
+            ))}
+          </Bar>
         </ComposedChart>
       </ResponsiveContainer>
     </div>
