@@ -1,6 +1,7 @@
 import { Link } from 'react-router-dom'
 import { ROUTES } from '../../constants/routes'
 import { useAuth } from '../../context/AuthContext'
+import SearchBar from '../stock/SearchBar'
 
 function Header() {
   const { user, logout } = useAuth()
@@ -27,13 +28,8 @@ function Header() {
         </div>
 
         <div className="flex items-center gap-4">
-          <div className="relative hidden sm:block">
-            <span className="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-outline-variant text-[18px]">search</span>
-            <input
-              className="bg-surface-container-low border border-[#30363d] rounded py-1.5 pl-10 pr-4 text-sm text-on-surface focus:outline-none focus:border-primary-container w-48 transition-all placeholder:text-outline"
-              placeholder="종목 검색..."
-              type="text"
-            />
+          <div className="hidden sm:block w-64">
+            <SearchBar placeholder="종목 검색..." size="sm"/>
           </div>
 
           {user ? (
