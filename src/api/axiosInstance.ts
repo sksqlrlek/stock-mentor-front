@@ -1,8 +1,9 @@
 import axios, { AxiosResponse, InternalAxiosRequestConfig } from 'axios'
 
 const axiosInstance = axios.create({
-  baseURL: 'http://localhost:8080',
+  baseURL: import.meta.env.VITE_API_BASE_URL,
   timeout: 10000,
+  withCredentials: false,
 })
 
 axiosInstance.interceptors.request.use((config: InternalAxiosRequestConfig) => {

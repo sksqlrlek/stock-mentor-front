@@ -10,6 +10,7 @@ import SignupPage from './pages/SignupPage'
 import StockDetailPage from './pages/StockDetailPage'
 import WatchlistPage from './pages/WatchlistPage'
 import MyPage from './pages/MyPage'
+import OAuthCallbackPage from './pages/OAuthCallbackPage'
 
 function AppContent() {
   const { user } = useAuth()
@@ -24,6 +25,7 @@ function AppContent() {
         <Route path={ROUTES.HOME} element={<Layout><HomePage /></Layout>} />
         <Route path={ROUTES.LOGIN} element={<LoginPage />} />
         <Route path={ROUTES.SIGNUP} element={<SignupPage />} />
+        <Route path="/oauth2/callback" element={<OAuthCallbackPage />} />
         <Route path={ROUTES.STOCK_DETAIL} element={<Layout><StockDetailPage /></Layout>} />
         <Route path={ROUTES.WATCHLIST} element={<Layout><WatchlistPage /></Layout>} />
         <Route path={ROUTES.MY_PAGE} element={<Layout><MyPage /></Layout>} />

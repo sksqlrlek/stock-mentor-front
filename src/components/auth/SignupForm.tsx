@@ -3,6 +3,7 @@ import { Link, useNavigate } from 'react-router-dom'
 import { ROUTES } from '../../constants/routes'
 import axiosInstance from '../../api/axiosInstance'
 import { useAuth } from '../../context/AuthContext'
+import axios from 'axios'
 
 interface SignupResponse {
   accessToken: string
@@ -38,8 +39,21 @@ function SignupForm() {
       const response = await axiosInstance.post<SignupResponse>('/api/auth/login', { email, password })
       login(response.data.accessToken, response.data.user)
       navigate(ROUTES.HOME)
-    } catch {
-      setError('이미 사용 중인 이메일입니다.')
+    } catch (error) {
+      if (axios.isAxiosError(error)) {
+        const status = error.response?.status
+        const message = error.response?.data?.message
+
+        if (status === 409) {
+          setError('이미 사용 중인 이메일입니다.')
+        } else if (message) {
+          setError(message)
+        } else {
+          setError(`오류가 발생했습니다. (${status ?? '연결 실패'})`)
+        }
+      } else {
+        setError('알 수 없는 오류가 발생했습니다.')
+      }
     }
   }
 
